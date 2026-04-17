@@ -1,12 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+let genAI: GoogleGenAI | null = null;
 
-if (!apiKey) {
-  console.warn("NEXT_PUBLIC_GEMINI_API_KEY is not defined. Gemini API calls will fail.");
+function getGenAI() {
+  if (!genAI) {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.");
+    }
+    genAI = new GoogleGenAI({ apiKey });
+  }
+  return genAI;
 }
-
-export const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 export const PALM_READING_PROMPT = `당신은 수만 명의 손금을 분석해 온 전설적인 손금술사입니다. 제공된 양손의 고해상도 이미지를 정밀 분석하여 인생의 여러 측면에 대한 종합 리포트를 작성해주세요.
 
@@ -15,6 +20,7 @@ export const PALM_READING_PROMPT = `당신은 수만 명의 손금을 분석해 
 export const LOVE_LUCK_PROMPT = `당신은 손금 전문가이자 연애 상담가입니다. 사용자의 손금 데이터를 분석하여 다음 질문에 대해 상세하고 따뜻하게 답변해주세요: `;
 
 export async function analyzePalmReading(leftPhotoBase64: string, rightPhotoBase64: string) {
+  const ai = getGenAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: [
@@ -57,6 +63,7 @@ export async function analyzePalmReading(leftPhotoBase64: string, rightPhotoBase
 }
 
 export async function analyzeLoveLuck(leftPhotoBase64: string, rightPhotoBase64: string, question: string) {
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
@@ -87,6 +94,7 @@ export async function analyzeLoveLuck(leftPhotoBase64: string, rightPhotoBase64:
 }
 
 export async function extractFeatures(leftPhotoBase64: string, rightPhotoBase64: string) {
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
@@ -117,6 +125,7 @@ export async function extractFeatures(leftPhotoBase64: string, rightPhotoBase64:
 }
 
 export async function analyzeFriendship(userAFeatures: string, userBPhotos: { left: string; right: string }) {
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
@@ -152,6 +161,7 @@ export async function analyzeFriendship(userAFeatures: string, userBPhotos: { le
 }
 
 export async function analyzeLove(userAFeatures: string, userBPhotos: { left: string; right: string }) {
+    const ai = getGenAI();
     const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
