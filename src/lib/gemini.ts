@@ -5,8 +5,16 @@ let genAI: GoogleGenAI | null = null;
 function getGenAI() {
   if (!genAI) {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    
+    // Debug logging for missing key issues
+    if (apiKey) {
+      console.log(`Gemini API key found: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
+    } else {
+      console.error("Gemini API key is MISSING (NEXT_PUBLIC_GEMINI_API_KEY)");
+    }
+
     if (!apiKey) {
-      throw new Error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.");
+      throw new Error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your Vercel environment variables and REDEPLOY.");
     }
     genAI = new GoogleGenAI({ apiKey });
   }
