@@ -1,20 +1,22 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import firebaseConfig from "../../firebase-applet-config.json";
 
 let genAI: GoogleGenAI | null = null;
 
 function getGenAI() {
   if (!genAI) {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    // 1순위: Vercel 환경 변수 (가장 권장)
+    // 2순위: firebase-applet-config.json 내의 apiKey (백업)
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || firebaseConfig.apiKey;
     
-    // Debug logging for missing key issues
     if (apiKey) {
-      console.log(`Gemini API key found: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
+      console.log(`Gemini API key loaded (from ${process.env.NEXT_PUBLIC_GEMINI_API_KEY ? 'Env' : 'Config'}): ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
     } else {
-      console.error("Gemini API key is MISSING (NEXT_PUBLIC_GEMINI_API_KEY)");
+      console.error("Gemini API key is MISSING everywhere.");
     }
 
-    if (!apiKey) {
-      throw new Error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your Vercel environment variables and REDEPLOY.");
+    if (!apiKey || apiKey === "") {
+      throw new Error("Gemini API key is missing. Please set NEXT_PUBLIC_GEMINI_API_KEY in your Vercel project settings and REDEPLOY.");
     }
     genAI = new GoogleGenAI({ apiKey });
   }
